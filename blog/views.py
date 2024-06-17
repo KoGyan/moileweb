@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from django.shortcuts import render
 from .models import Post
 from django.utils import timezone
@@ -42,6 +43,18 @@ def post_edit(request, pk):
     else:
         form = PostForm(instance=post)
     return render(request, 'blog/post_edit.html', {'form': form})
+
+def upload_image(request):
+    if request.method == 'POST':
+        if 'image' in request.FILES:
+            image = request.FILES['image']
+            title = request.POST.get('title', 'No title')
+            text = request.POST.get('text', 'No text')
+            post = Post.objects.create(author=request.user, title=title, text=text, image=image, created_date=timezone.now())
+            return JsonResponse({'message': 'Image uploaded successfully!'}, status=201)
+        else:
+            return JsonResponse({'error': 'No image found in request.'}, status=400)
+    return JsonResponse({'error': 'Invalid request method.'}, status=405)
 
 
 
